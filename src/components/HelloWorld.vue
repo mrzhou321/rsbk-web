@@ -1,48 +1,163 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <el-form :inline="true" style="text-align: left">
+      <el-form-item>
+        <el-button type="primary" @click="handleTbfx">图表分析</el-button>
+      </el-form-item>
+    </el-form>
+    <div class="table">
+      <road-table :columns="columns" :dataSource="tableData" has-index>
+      </road-table>
+    </div>
+    <el-dialog
+            v-if="dialogVisible"
+            title="岗位图表分析"
+            :visible.sync="dialogVisible"
+            width="80%"
+            center
+            class="normal-dialog"
+            :show-close="false"
+    >
+      <div class="side-box-body">
+        <div style="width: 800px;height: 600px" ref="chart"></div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+      <el-button type="warning" @click="dialogVisible=false">{{"关闭" }}</el-button>
+    </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-export default {
+  import  RoadTable from './roadTable'
+  import data from './data'
+  import * as echarts from 'echarts';
+
+  export default {
   name: 'HelloWorld',
+  components:{
+    RoadTable
+  },
   props: {
     msg: String
+  },
+  data(){
+    return {
+      dialogVisible: false,
+      columns: [
+        {
+          prop: "zpdw",
+          label: "招聘单位",
+          key: "zpdw"
+        },
+        {
+          prop: "gwdm",
+          label: "岗位代码",
+          key: "gwdm"
+        },
+        {
+          prop: "zpyq",
+          label: "招聘要求",
+          key: "zpyq"
+        },
+        {
+          prop: "sfkzyk",
+          label: "是否考专业课",
+          key: "sfkzyk"
+        },
+        {
+          prop: "lxfs",
+          label: "联系方式 ",
+          key: "lxfs"
+        },
+        {
+          prop: "tjxxrs",
+          label: "提交信息人数(个)",
+          key: "tjxxrs",
+          sortable: true
+        },
+        {
+          prop: "hgrs",
+          label: "资审合格人数(个)",
+          key: "hgrs",
+          sortable: true
+        },
+        {
+          prop: "jfrs",
+          label: "缴费人数(个)",
+          key: "jfrs",
+          sortable: true
+        },
+        {
+          prop: "dz",
+          label: "地址",
+          key: "dz"
+        }
+      ],
+      tableData: data
+    }
+  },
+  methods:{
+    handleTbfx(){
+      this.dialogVisible = true
+      console.log(this.$refs.chart);
+      this.$nextTick(() => {
+        const myChart = echarts.init(this.$refs.chart);
+        const option = {
+          tooltip: {
+            trigger: "item",
+            formatter: "{a} <br/>{b} : {c}"
+          },
+          title: [
+            {
+              text: "岗位分析",
+              bottom: 0,
+              left: "50%",
+              textStyle: {
+                color: "#fff",
+                fontSize: "12px"
+              },
+              textAlign: "center"
+            }
+          ],
+          xAxis: {
+            type: 'category',
+            data: data.map(item => item.zpdw)
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [{
+            data: data.map(item => {
+             return  item.tjxxrs
+            }),
+            type: 'bar',
+            showBackground: true,
+            backgroundStyle: {
+              color: 'rgba(180, 180, 180, 0.2)'
+            }
+          }]
+        };
+
+        option && myChart.setOption(option);
+      })
+
+    }
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
+  html{
+    padding: 0;
+  }
+  .hello{
+    padding: 0;
+  }
 h3 {
-  margin: 40px 0 0;
+  margin:  0;
 }
 ul {
   list-style-type: none;
