@@ -8,7 +8,7 @@
       </el-form-item>
     </el-form>
     <div class="table">
-      <road-table :columns="columns" :dataSource="tableData" has-index>
+      <road-table :columns="columns" :dataSource="tableData" tableHeight="800px" has-index>
       </road-table>
     </div>
     <el-dialog
@@ -28,7 +28,7 @@
           </el-select>
         </el-form-item>
       </el-form>
-        <div style="width: 800px;height: 600px" ref="chart"></div>
+        <div style="width: 100%;height: 600px" ref="chart"></div>
       </div>
       <span slot="footer" class="dialog-footer">
       <el-button type="warning" @click="dialogVisible=false">{{"关闭" }}</el-button>
