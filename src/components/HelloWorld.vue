@@ -4,6 +4,7 @@
     <el-form :inline="true" style="text-align: left">
       <el-form-item>
         <el-button type="primary" @click="handleTbfx">图表分析</el-button>
+         <!-- <el-button type="primary" @click="handleyj">综合意见</el-button> -->
       </el-form-item>
     </el-form>
     <div class="table">
@@ -17,9 +18,16 @@
             width="80%"
             center
             class="normal-dialog"
-            :show-close="false"
     >
       <div class="side-box-body">
+        <el-form :inline="true" >
+       <el-form-item>
+          <el-select  v-model="fxtj" placeholder="分析条件" clearable style="width:148px" @change="changeChart">
+            <el-option v-for="status in mapStatuses" :value="status.value" :key="status.value" :label="status.label">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
         <div style="width: 800px;height: 600px" ref="chart"></div>
       </div>
       <span slot="footer" class="dialog-footer">
@@ -44,6 +52,8 @@
   },
   data(){
     return {
+      fxtj: "1",
+      mychart: null,
       dialogVisible: false,
       columns: [
         {
@@ -95,55 +105,140 @@
           key: "dz"
         }
       ],
-      tableData: data
+      tableData: data,
+      mapStatuses:[
+        {
+          label: "提交信息人数",
+          value: "1",
+          title: "岗位分析(提交信息人数:个)",
+          key: "tjxxrs"
+        },
+           {
+          label: "资审合格人数",
+          value: "2",
+            title: "岗位分析(资审合格人数:个)",
+          key: "hgrs"
+        },
+           {
+          label: "缴费人数",
+          value: "3",
+             title: "岗位分析(缴费人数:个)",
+          key: "jfrs"
+        },
+           {
+          label: "距离",
+          value: "4",
+              title: "岗位分析(距离:km)",
+          key: "jl"
+        }
+      ]
     }
+  },
+  mounted(){
+    
   },
   methods:{
     handleTbfx(){
       this.dialogVisible = true
-      console.log(this.$refs.chart);
-      this.$nextTick(() => {
-        const myChart = echarts.init(this.$refs.chart);
+      console.log(this.$refs.chart)
+       this.$nextTick(() => {
+         this.myChart = echarts.init(this.$refs.chart);
         const option = {
+           legend: {
+          type: "plain",
+          orient: "horizontal",
+          left: "center",
+          bottom: "6%",
+          width: "100%",
+          itemGap: 4,
+          itemWidth: 10,
+          itemHeight: 10,
+          align: "left",
+          textStyle: {
+            //图例文字的样式
+            color: "#fff",
+            fontSize: "12px"
+          }
+        },
           tooltip: {
-            trigger: "item",
-            formatter: "{a} <br/>{b} : {c}"
+            trigger: "item"
           },
-          title: [
-            {
-              text: "岗位分析",
-              bottom: 0,
+          title: {
+              text: "岗位分析(提交信息人数:个)",
+              bottom: 20,
               left: "50%",
-              textStyle: {
-                color: "#fff",
-                fontSize: "12px"
-              },
               textAlign: "center"
+            },
+            label:{
+              show: true,
+              position: "top"
+            },
+         xAxis: {
+            show: true,
+            type: "category",
+            axisLine: {
+
             }
-          ],
-          xAxis: {
-            type: 'category',
-            data: data.map(item => item.zpdw)
           },
-          yAxis: {
-            type: 'value'
+        yAxis: {
+            type: "value",
+            splitLine: {
+              show: false
+            },
+            axisLabel: {
+              show: true
+            },
+            axisTick: {
+              show: false
+            },
+            axisLine: {
+              lineStyle: {
+                type: "dashed",
+                color: "#35619d"
+              }
+            }
+            // show: false
           },
-          series: [{
+          series: {
             data: data.map(item => {
-             return  item.tjxxrs
-            }),
+             return  {
+               name: item.zpdw,
+               value: item.tjxxrs
+            }}),
             type: 'bar',
             showBackground: true,
             backgroundStyle: {
               color: 'rgba(180, 180, 180, 0.2)'
             }
-          }]
+          }
         };
-
-        option && myChart.setOption(option);
+        option && this.myChart.setOption(option);
       })
+  },
+  changeChart(val){
+     if(val){
+       const item  = this.mapStatuses.find(_ => _.value === val);
+       this.$nextTick(() => {
+        this.myChart.setOption({
+         title:{
+           text: item.title
+         },
+         series:{
+           data: data.map(_ => {
+             return  {
+                name: _.zpdw,
+               value: _[item.key]
+            }}),
+         }
+         })
+       })
+     
+     } 
+  },
+  handleyj(){
 
-    }
+  }
+
   }
 }
 </script>
